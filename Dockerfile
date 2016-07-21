@@ -2,9 +2,11 @@ FROM centos:centos7
 
 MAINTAINER Unicon, Inc.
 
-RUN yum -y install epel-release \
+RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+    && rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm \
+    && yum -y install epel-release \
     && yum -y update \
-    && yum -y install httpd mod_ssl php php-mcrypt php-pear php-xml php-pdo wget \
+    && yum -y install httpd mod_ssl php55w php55w-mcrypt php55w-pdo php55w-pear php55w-xml wget \
     && yum -y clean all
 
 RUN ssp_version=1.13.2; \
