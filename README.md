@@ -1,18 +1,19 @@
 [![](https://badge.imagelayers.io/unicon/simplesamlphp:latest.svg)](https://imagelayers.io/?images=unicon/simplesamlphp:latest 'image layer analysis')
 
 ## Overview
-This Docker image contains a deployed SimpleSAMLphp IdP/SP based on PHP 7.2 running on Appache HTTP Server 2.4 on the latest CentOS 7 base. This image is a base image and should be used to set the content and configuration with local changes. It is suitable for use as a standalone IdP application or as a base to deploy another PHP application that will be protected by the service provider module.
+This Docker image contains a deployed SimpleSAMLphp IdP/SP based on PHP 7.2 running on Apache HTTP Server 2.4 on the latest CentOS 7 base (NOTE: As of unicon/simplesamlphp:1.18.3 and later, a CentOS 8 base is used). This image is a base image and should be used to set the content and configuration with local changes. It is suitable for use as a standalone IdP application or as a base to deploy another PHP application that will be protected by the service provider module.
 
 ```
 [rootdir]
 |-- etc/
 |   |-- httpd/
 |   |   |-- conf/       - The Apache HTTP Server configuration
+|   |   |-- conf.d/     - Apache modules
 |-- var/
 |   |-- log/
 |   |   |-- httpd/      - The log files for Apache HTTP Server 
 |   |-- simplesamlphp/  - The base SimpleSAMLphp directory
-|   |   |-- conf/       - The SimpleSAMLphp configuration directory
+|   |   |-- config/     - The SimpleSAMLphp configuration directory
 |   |-- www/
 |   |   |-- html/       - The base Apache HTTP Server document root directory
 ```
@@ -35,8 +36,10 @@ You should use this image as a base image for one's own IdP/SP deployment. The d
 |-- .dockerignore
 |-- Dockerfile
 |-- etc-httpd/
-|   |-- conf.d/
+|   |-- conf/
 |   |   |-- httpd.conf
+|   |-- conf.d/
+|   |   |-- ssl.conf
 |-- var-simplesamlphp/
 |   |-- config/
 |   |   |-- config.php
@@ -110,7 +113,20 @@ It maybe desirable to map things like  `/var/log/httpd/` or `/var/simplesamlphp/
 There are a few things that implementors should be aware of.
 
 ### Browser-based TLS Certificate and Key
-Adapters should generate their own private key and get the CSR signed by a trusted certificate authority. The resulting files should be included in the image (directly or mounted to the container at start-up). The standard Apache HTTPD TLS config can be changed by adding/modifying the files in `/etc/httpd/conf.d/`.
+Adapters should generate their own private key and get the CSR signed by a trusted certificate authority. The resulting files should be included in the image (directly or mounted to the container at start-up). The standard Apache HTTPD TLS config should be configured by:
+
+1) Copying ssl.conf.template to ssl.conf
+2) Generating a localhost.crt and localhost.key file using openssl
+3) Updating Dockerfile and replacing:
+   RUN rm /etc/httpd/conf.d/ssl.conf
+   COPY ssl.conf.template /etc/httpd/conf.d
+
+   with
+
+   COPY ssl.conf /etc/httpd/conf.d
+   COPY localhost.crt /etc/pki/tls/certs
+   COPY localhost.key /etc/pki/tls/private
+4) Rebuilding the image
 
 ### Logging 
 This image does not use the standard Docker logging mechanism, but the native OS-based logging.
