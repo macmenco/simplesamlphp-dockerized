@@ -1,20 +1,18 @@
-FROM centos:centos7
+FROM centos:centos8
 
 LABEL maintainer="Unicon, Inc."
 
-RUN yum -y install epel-release \
-    && yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm \
-    && yum -y update \
-    && yum-config-manager --enable remi-php72 \
-    && yum -y install httpd mod_ssl php php-ldap php-mbstring php-memcache php-mcrypt php-pdo php-pear php-xml wget \
+RUN yum update \
+    && yum -y install httpd mod_ssl wget \
+    && yum -y install php php-ldap php-json php-mbstring php-xml \
     && yum -y clean all
 
-RUN ssp_version=1.17.2; \
-    ssp_hash=0e2fd641e8cba2966437fb64591e28a73fb90bae3bc97949c60a47a5b8c1e80e; \
-    wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v$ssp_version/simplesamlphp-$ssp_version.tar.gz \
-    && echo "$ssp_hash  simplesamlphp-$ssp_version.tar.gz" | sha256sum -c - \
-	&& cd /var \
-	&& tar xzf /simplesamlphp-$ssp_version.tar.gz \
+RUN ssp_version=1.18.3; \
+    ssp_hash=c6cacf821ae689de6547092c5d0c854e787bfcda716096b1ecf39ad3b3882500; \
+    wget -q https://github.com/simplesamlphp/simplesamlphp/releases/download/v$ssp_version/simplesamlphp-$ssp_version.tar.gz \
+    && echo "$ssp_hash simplesamlphp-$ssp_version.tar.gz" | sha256sum -c - \
+    && cd /var \
+    && tar xzf /simplesamlphp-$ssp_version.tar.gz \
     && mv simplesamlphp-$ssp_version simplesamlphp \
     && rm /simplesamlphp-$ssp_version.tar.gz
 
@@ -24,6 +22,8 @@ RUN echo $'\nSetEnv SIMPLESAMLPHP_CONFIG_DIR /var/simplesamlphp/config\nAlias /s
 </Directory>\n' \
        >> /etc/httpd/conf/httpd.conf
 
+RUN rm /etc/httpd/conf.d/ssl.conf 
+COPY ssl.conf.template /etc/httpd/conf.d
 COPY httpd-foreground /usr/local/bin/
 
 EXPOSE 80 443
