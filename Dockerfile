@@ -22,8 +22,8 @@ RUN echo $'\nSetEnv SIMPLESAMLPHP_CONFIG_DIR /var/simplesamlphp/config\nAlias /s
 </Directory>\n' \
        >> /etc/httpd/conf/httpd.conf
 
-RUN rm /etc/httpd/conf.d/ssl.conf 
-COPY ssl.conf.template /etc/httpd/conf.d
+COPY localhost.crt /etc/pki/tls/certs/
+COPY localhost.key /etc/pki/tls/private/
 COPY httpd-foreground /usr/local/bin/
 
 EXPOSE 80 443

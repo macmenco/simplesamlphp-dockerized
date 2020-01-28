@@ -113,20 +113,7 @@ It maybe desirable to map things like  `/var/log/httpd/` or `/var/simplesamlphp/
 There are a few things that implementors should be aware of.
 
 ### Browser-based TLS Certificate and Key
-Adapters should generate their own private key and get the CSR signed by a trusted certificate authority. The resulting files should be included in the image (directly or mounted to the container at start-up). The standard Apache HTTPD TLS config should be configured by:
-
-1) Copying ssl.conf.template to ssl.conf
-2) Generating a localhost.crt and localhost.key file using openssl
-3) Updating Dockerfile and replacing:
-   RUN rm /etc/httpd/conf.d/ssl.conf
-   COPY ssl.conf.template /etc/httpd/conf.d
-
-   with
-
-   COPY ssl.conf /etc/httpd/conf.d
-   COPY localhost.crt /etc/pki/tls/certs
-   COPY localhost.key /etc/pki/tls/private
-4) Rebuilding the image
+Adapters should generate their own private key and get the CSR signed by a trusted certificate authority. The resulting files should be included in the image (directly or mounted to the container at start-up). The standard Apache HTTPD TLS config can be changed by modifying /etc/httpd/conf.d/ssl.conf.
 
 ### Logging 
 This image does not use the standard Docker logging mechanism, but the native OS-based logging.
