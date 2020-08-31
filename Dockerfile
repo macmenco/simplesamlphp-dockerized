@@ -7,7 +7,7 @@ RUN yum -y install epel-release \
     && yum -y update \
     && yum-config-manager --enable remi-php72 \
     && yum -y install httpd mod_ssl wget \
-    && yum -y install php php-ldap php-mbstring php-memcache php-mcrypt php-pdo php-pear php-xml \
+    && yum -y install php php-ldap php-mbstring php-memcache php-mcrypt php-pdo php-pear php-xml php-soap \
     && yum -y clean all
 
 RUN ssp_version=1.18.4; \
